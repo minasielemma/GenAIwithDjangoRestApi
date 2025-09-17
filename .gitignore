@@ -1,3 +1,5 @@
 chat/migrations/
 user_auth/migrations/
 .env
+/data/
+/rabbitmq_data/

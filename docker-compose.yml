@@ -85,7 +85,7 @@ services:
 
   celery_worker:
     image: genaiwithdjangorestapi-backend:latest
-    command: sh -c "celery -A guesthomeback worker --loglevel=debug & celery -A guesthomeback beat --loglevel=debug"    
+    command: sh -c "celery -A GenAIwithDjangoRestApi worker --loglevel=debug & celery -A GenAIwithDjangoRestApi beat --loglevel=debug"    
     depends_on:
       - rabbitmq
       - backend
