@@ -1,0 +1,3 @@
+chat/migrations/
+user_auth/migrations/
+.env

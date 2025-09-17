@@ -1,0 +1,138 @@
+version: '3.3'
+networks:
+  system-network:
+
+services:
+
+  mongo_db:
+    build:
+      context: ./mongodb_config
+      dockerfile: Dockerfile
+    command: mongod --bind_ip_all --config /etc/mongod.conf --logappend
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    networks:
+      system-network:
+    restart: on-failure
+    volumes:
+      - mongo_db_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongodb_config/mongod.conf:/etc/mongod.conf
+    ports:
+      - "27017:27017"
+
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      system-network:
+    restart: on-failure
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+
+  backend:
+    build: .
+    # command: sh -c "python manage.py makemigrations house&&python manage.py makemigrations payment&&python manage.py makemigrations agent&&python manage.py makemigrations adminapp --no-input&&python manage.py makemigrations user&&python manage.py migrate&&python manage.py generate_api_keys&&python manage.py makemigrations authapp&&python manage.py migrate authapp&&python manage.py makemigrations hostapp&&daphne -b 0.0.0.0 -p 9010 guesthomeback.asgi:application"
+    command: sh -c "daphne -b 0.0.0.0 -p 9010 GenAIwithDjangoRestApi.asgi:application"
+    volumes:
+      - ../dev_backend/guesthomeback:/code
+      - ./static:/code/static
+      - dev-backend_data:/mediafiles
+
+    depends_on:
+      - db
+    ports:
+      - 9010:9010
+    networks:
+      system-network:
+    restart: on-failure
+    environment:
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DEBUG: "True"
+      CELERY_BROKER_URL: amqp://${CELERY_BROKER_USER}:${CELERY_BROKER_PASSWORD}@rabbitmq:${CELERY_BROKER_PORT}//
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+
+
+  redis_notification:
+    image: redis:latest
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6376:6379"
+    networks:
+      system-network:
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    dns:
+      - "8.8.8.8"
+      - "8.8.4.4"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+
+  celery_worker:
+    image: genaiwithdjangorestapi-backend:latest
+    command: sh -c "celery -A guesthomeback worker --loglevel=debug & celery -A guesthomeback beat --loglevel=debug"    
+    depends_on:
+      - rabbitmq
+      - backend
+    restart: unless-stopped
+    networks:
+      system-network:
+    volumes:
+    - .:/code
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    environment:
+      - CELERY_BROKER_URL=amqp://${CELERY_BROKER_USER}:${CELERY_BROKER_PASSWORD}@rabbitmq:${CELERY_BROKER_PORT}//
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+    dns:
+      - "8.8.8.8"
+      - "8.8.4.4"
+
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    volumes:
+      - ./rabbitmq_data:/var/lib/rabbitmq/mnesia
+      - ./rabbitmq_data:/var/log/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - system-network
+    restart: unless-stopped
+    command: ["bash", "-c", "chmod 600 /var/lib/rabbitmq/.erlang.cookie; rabbitmq-server"]
+
+volumes:
+  db_data:
+  dev-backend_data:
+  prom_data:
+  mongo_db_data:
