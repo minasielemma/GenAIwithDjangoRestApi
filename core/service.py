@@ -61,7 +61,7 @@ class OllamaChatService:
     
     
     def generate_response(self, session_id:str, user_input:str)-> dict:
-        # try:
+        try:
             history, context = self.get_full_conversation_context(session_id, user_input)
             conversation = self.create_conversation_chain(session_id=session_id)
             response = conversation.predict(input=user_input)
@@ -75,9 +75,9 @@ class OllamaChatService:
                 "method": "langchain"
             }
 
-        # except Exception as e:
-        #     logger.info(f"Got error generating response with conversation {e}")
-        #     return self._fallback_response(session_id, user_input)
+        except Exception as e:
+            logger.info(f"Got error generating response with conversation {e}")
+            return self._fallback_response(session_id, user_input)
         
     def _fallback_response(self, session_id:str, user_input:str) -> dict:
         try:

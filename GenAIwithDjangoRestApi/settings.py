@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'django_redis',
 
     'chat',
-    'user_auth'
+    'user_auth',
+    'documents'
 
 ]
 

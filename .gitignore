@@ -1,5 +1,8 @@
 chat/migrations/
 user_auth/migrations/
+documents/migrations/
 .env
 /data/
 /rabbitmq_data/
+uploads/
+faiss_indexes/

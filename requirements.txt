@@ -33,4 +33,5 @@ requests
 django_celery_results
 djangorestframework-simplejwt
 django-cors-headers
+matplotlib
 
