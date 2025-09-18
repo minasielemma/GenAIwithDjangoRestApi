@@ -35,3 +35,11 @@ djangorestframework-simplejwt
 django-cors-headers
 matplotlib
 
+mcp
+ollama
+fastapi
+uvicorn
+pydantic
+langchain
+imap-tools
+python-dateutil

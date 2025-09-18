@@ -48,7 +48,9 @@ class DocumentAgent:
             agent="zero-shot-react-description",
             memory=self.memory,
             verbose=True,
-            handle_parsing_errors=True
+            handle_parsing_errors=True,
+            max_iterations=10,
+            early_stopping_method="generate"
         )
     def _retriever_tool(self, query: str) -> str:
         try:
