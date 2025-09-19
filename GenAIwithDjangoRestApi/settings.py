@@ -54,7 +54,8 @@ INSTALLED_APPS = [
 
     'chat',
     'user_auth',
-    'documents'
+    'documents',
+    'api_with_mcp'
 
 ]
 

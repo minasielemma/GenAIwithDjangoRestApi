@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('bot/',include('chat.urls')),
     path('accounts/', include('user_auth.urls')),
-    path('documents/', include('documents.urls'))
+    path('documents/', include('documents.urls')),
+    path('mcp/', include('api_with_mcp.urls'))
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -7,3 +7,4 @@ documents/migrations/
 uploads/
 faiss_indexes/
 /media/
+mcp_server/.env

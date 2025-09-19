@@ -1,0 +1,14 @@
+mcp
+ollama
+fastapi
+uvicorn
+pydantic
+langchain
+imap-tools
+python-dateutil
+pyda 
+uvicorn 
+psycopg2-binary 
+sqlalchemy 
+python-jose
+passlib[bcrypt]
