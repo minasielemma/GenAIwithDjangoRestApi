@@ -6,3 +6,4 @@ documents/migrations/
 /rabbitmq_data/
 uploads/
 faiss_indexes/
+/media/
