@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 import os
 
-from core.agent import DocumentAgent
+from core.document_agent import DocumentAgent
 
 from .models import UploadedDocument
 from .serializers import UploadedDocumentSerializer

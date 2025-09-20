@@ -24,6 +24,7 @@ urlpatterns = [
     path('bot/',include('chat.urls')),
     path('accounts/', include('user_auth.urls')),
     path('documents/', include('documents.urls')),
-    path('mcp/', include('api_with_mcp.urls'))
+    path('mcp/', include('api_with_mcp.urls')),
+    path('weather/', include('weather_Agent.urls')),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
