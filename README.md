@@ -26,7 +26,7 @@ GenAIwithDjangoRestApi is a backend project built with Django REST Framework to 
 ## Features
 
 - **JWT-based User Registration, Login, and Password Change**
-- **Chat Agent**: AI-powered chat endpoint for natural conversations
+- **Chat Agent**: AI-powered chat endpoint for natural conversations, chat history, multi-session support
 - **Document Agent**: Upload, vectorize, query, summarize, and analyze PDF documents
 - **Weather Agent**: Query real-world weather, get AI-powered summaries, activity suggestions, and health tips
 - **RESTful APIs**: Designed for easy use in web and mobile applications
@@ -57,14 +57,19 @@ GenAIwithDjangoRestApi is a backend project built with Django REST Framework to 
 Password validation uses Django’s built-in validators plus custom checks for similarity, length, and common passwords.
 
 ### Chat Agent (`chat`)
-- AI-powered chat endpoint for conversational features (see `chat` app).
+- `POST /bot/api/v1/conversations/create/` — Start a new chat session, returns session_id
+- `GET /bot/api/v1/conversations/<session_id>/` — Get details and stats for a conversation session
+- `POST /bot/api/v1/conversations/<session_id>/send-message/` — Send a message and get AI-powered reply, maintains conversation context and history
+- `GET /bot/api/v1/conversations/<session_id>/stats/` — Get statistics for the session (e.g., message count)
+- `POST /bot/api/v1/conversations/<session_id>/clear/` — Clear memory/history for a session
+- `GET /bot/api/v1/status/` — Get system status and available models
 
 ### Document Agent (`documents`)
 - `POST /documents/api/v1/upload/` — Upload PDF, vectorize and index for queries
 - `POST /documents/api/v1/query/<session_id>/` — Ask questions about uploaded docs, get summaries, data analysis, and graphs
 
 ### Weather Agent (`weather_Agent`)
-- `POST /weather_analysis/api/v1//<session_id>/` — Ask about any city’s weather, get real-time conditions plus AI analysis, activity suggestions, and health tips
+- `POST /weather_analysis/api/v1/<session_id>/` — Ask about any city’s weather, get real-time conditions plus AI analysis, activity suggestions, and health tips
 
 ---
 
@@ -83,21 +88,27 @@ Password validation uses Django’s built-in validators plus custom checks for s
 ## Agent Apps
 
 ### Chat Agent
-- Handles conversational AI using an LLM backend.
-- Suitable for integrating chatbot features in frontend/mobile apps.
+
+- Multi-session AI chat, each session has a unique session_id
+- Maintains full conversation history in MongoDB for context
+- Endpoints for creating a session, sending/receiving messages, clearing history, and getting stats
+- Powered by Ollama LLM and LangChain, with configurable models
+- Useful for integrating conversational AI into web/mobile clients
 
 ### Document Agent
-- Upload PDFs, automatically vectorized for semantic search and QA.
-- Endpoints for querying, summarizing, extracting/analyzing data (means, sums, min/max, etc.), and generating graphs from document data.
-- Uses LangChain tools and MongoDB-backed conversation memory to maintain session context.
+
+- Upload PDFs, automatically vectorized for semantic search and QA
+- Endpoints for querying, summarizing, extracting/analyzing data (means, sums, min/max, etc.), and generating graphs from document data
+- Uses LangChain tools and MongoDB-backed conversation memory to maintain session context
 
 ### Weather Agent
+
 - Accepts a city name and returns:
   - Real-time weather data (from wttr.in)
   - AI-generated summary of conditions
   - Suggested activities (indoors/outdoors)
   - Health tips (e.g., hydration, clothing, sun protection)
-- Uses LangChain agent and custom tools for weather retrieval and analysis.
+- Uses LangChain agent and custom tools for weather retrieval and analysis
 
 ---
 
@@ -126,7 +137,8 @@ Password validation uses Django’s built-in validators plus custom checks for s
    python manage.py runserver
    ```
 
-
+5. **Access API Docs**
+   - Open `http://localhost:8000/swagger/` for interactive documentation.
 
 ---
 
@@ -137,7 +149,7 @@ Password validation uses Django’s built-in validators plus custom checks for s
 - Use standard fetch/HTTP libraries (Axios, fetch, Flutter http, etc.).
 - For AI endpoints (chat, weather, document), POST with:
   ```json
-  { "question": "What is the weather in Paris?" }
+  { "message": "Hello, AI!" }
   ```
   and supply `Authorization: Bearer <token>`.
 
