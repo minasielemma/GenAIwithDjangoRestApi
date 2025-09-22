@@ -137,9 +137,6 @@ Password validation uses Django’s built-in validators plus custom checks for s
    python manage.py runserver
    ```
 
-5. **Access API Docs**
-   - Open `http://localhost:8000/swagger/` for interactive documentation.
-
 ---
 
 ## Frontend/Mobile Integration Guide
