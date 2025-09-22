@@ -11,7 +11,7 @@ class EmailAnalysisView(APIView):
         email_content = request.data.get("email")  
 
         try:
-            response = requests.post("http://localhost:8001/analyze", json={"email": email_content})
+            response = requests.get("http://localhost:8001/mcp/emails/since-yesterday")
             result = response.json()
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
