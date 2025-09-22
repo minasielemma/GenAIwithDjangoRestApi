@@ -37,7 +37,7 @@ GenAIwithDjangoRestApi is a backend project built with Django REST Framework to 
 ## Tech Stack
 
 - **Backend**: Django, Django REST Framework, Channels
-- **Database**: SQLite (default), MongoDB (for agent memory), can be changed to PostgreSQL/MySQL
+- **Database**: PostgreSQL, MongoDB (for agent memory)
 - **Authentication**: JWT (rest_framework_simplejwt)
 - **AI Models**: LLM via Ollama, LangChain agents
 - **Other**: Redis (caching), Celery (task queue), drf-spectacular (API docs)
