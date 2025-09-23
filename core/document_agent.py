@@ -19,7 +19,13 @@ class DocumentAgent:
         self.user_id = user_id
         self.session_id = session_id
         self.doc_id = doc_id
-        self.llm = Ollama(model="artifish/llama3.2-uncensored")
+        self.llm = Ollama(model="artifish/llama3.2-uncensored",    
+                          system="You are an AI assistant. Always answer in this format:\n\n"
+                                "Question: <the user query>\n"
+                                "Thought: <your reasoning>\n"
+                                "Action: <tool name or Final Answer>\n"
+                                "Action Input: <input for the tool>\n"
+                                "Final Answer: <your final answer to the user>")
         self.memory = MongoConversationMemory(
             session_id=session_id,
             user_id=user_id
@@ -42,12 +48,20 @@ class DocumentAgent:
             func=self._analyze_data,
             description="Extract and analyze numerical data from the document (e.g., stats like mean, sum)."
         )
+        question_tool = Tool(
+            name="Question Generator",
+            func=self._generate_questions,
+            description=(
+                "Generate different types of questions (MCQ, true/false, short answer, or open-ended) "
+                "from the document or specific query text."
+            )
+        )
         graph_tool = Tool(
             name="Graph Maker",
             func=self._make_graph,
             description="Create a simple graph (bar/line) from extracted data. Specify type: 'bar' or 'line'."
         )
-        tools = [retriever_tool, summarizer_tool, analyzer_tool, graph_tool]
+        tools = [retriever_tool, summarizer_tool, analyzer_tool, graph_tool, question_tool]
         self.agent = initialize_agent(
             tools=tools,
             llm=self.llm,
@@ -55,11 +69,80 @@ class DocumentAgent:
             memory=self.memory,
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=10,
+            max_iterations=5,
             early_stopping_method="generate"
         )
         logger.info("DocumentAgent initialized successfully.")
 
+    def _generate_questions(self, query: str) -> dict:
+        logger.info("Generating questions for query: %s", query)
+        try:
+            if query.lower() == "full":
+                chunks = self.retriever.get_all_chunks()
+                text = "\n".join([doc.page_content for doc in chunks])
+            else:
+                text = self.retriever.query(query)
+
+            question_prompt = f"""
+            You are a question generation assistant.
+            From the following text, generate diverse types of questions:
+
+            Text:
+            {text}
+
+            Instructions:
+            - Create at least 5 questions or by user query.
+            - Mix question types: Multiple-choice, True/False, Short answer, and Open-ended.
+            - Always provide suggested answers for each question.
+            - Return output in strict JSON format:
+            {{
+              "questions": [
+                {{
+                  "type": "MCQ",
+                  "question": "What is ...?",
+                  "options": ["A", "B", "C", "D"],
+                  "answer": "B"
+                }},
+                {{
+                  "type": "True/False",
+                  "question": "The text says ...",
+                  "answer": "True"
+                }},
+                {{
+                  "type": "Short Answer",
+                  "question": "Explain ...",
+                  "answer": "..."
+                }},
+                {{
+                  "type": "Open-ended",
+                  "question": "Discuss ...",
+                  "answer": "Sample points..."
+                }}
+              ]
+            }}
+            """
+
+            llm_response = self.llm(question_prompt).strip()
+            questions = self._safe_json_parse(llm_response, context_hint="Question generation")
+            if not questions:
+                return {
+                    "action": "Final Answer",
+                    "action_input": "Could not generate questions. Try refining the query."
+                }
+
+            logger.info("Questions generated successfully.")
+            return {
+                "action": "Final Answer",
+                "action_input": questions
+            }
+
+        except Exception as e:
+            logger.error("Error in _generate_questions: %s", str(e))
+            return {
+                "action": "Final Answer",
+                "action_input": f"Error generating questions: {str(e)}"
+            }
+        
     def _retriever_tool(self, query: str) -> dict:
         logger.info("Retrieving document content for query: %s", query)
         try:
