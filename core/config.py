@@ -2,7 +2,7 @@ from django.conf import settings
 import os
 
 class AgentConfig:
-    LLM_MODEL = "artifish/llama3.2-uncensored"
+    LLM_MODEL = "gemma3:12b"
     LLM_SYSTEM_PROMPT = """You are an AI assistant. Always answer in this format:
 
     Question: <the user query>
@@ -12,7 +12,7 @@ class AgentConfig:
     Final Answer: <your final answer to the user>"""
 
     AGENT_TYPE = "zero-shot-react-description"
-    MAX_ITERATIONS = 5
+    MAX_ITERATIONS = 2
     EARLY_STOPPING_METHOD = "generate"
     MEDIA_ROOT = settings.MEDIA_ROOT
     MEDIA_URL = settings.MEDIA_URL

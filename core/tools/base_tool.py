@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import logging
 import json
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class BaseTool(ABC):
         self.description = description
     
     @abstractmethod
-    def execute(self, query: str, **kwargs):
+    def execute(self, query: str, **kwargs) -> Any:
         pass
     
     def _safe_json_parse(self, llm_output: str, context_hint: str = "") -> dict:

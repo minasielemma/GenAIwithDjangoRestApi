@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 class WeatherAgent:
-    def __init__(self, user_id: str, session_id: str = "default", llm_model: str = "artifish/llama3.2-uncensored"):
+    def __init__(self, user_id: str, session_id: str = "default", llm_model: str = "gemma3:12b"):
         logger.info(f"Initializing WeatherAgent for user: {user_id}, session: {session_id} with model: {llm_model}")
         self.user_id = user_id
         self.session_id = session_id

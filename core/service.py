@@ -14,7 +14,7 @@ logger = logging.getLogger('__name__')
 class OllamaChatService:
 
     def __init__(self, user_id:str) -> None:
-        self.llm = ollama.Ollama(model="artifish/llama3.2-uncensored",          
+        self.llm = ollama.Ollama(model="gemma3:12b",          
                                  temperature=0.7,
                                  top_p=0.9,
                                  num_ctx=2048
@@ -85,7 +85,7 @@ class OllamaChatService:
             history = memory.load_memory_variables({}).get('history')
             prompt = f"{history}\nUser: {user_input}\nAI"
             response = ollama_client.generate(
-                model="artifish/llama3.2-uncensored",
+                model="gemma3:12b",
                 prompt=prompt,
                 stream=False,
                 options={

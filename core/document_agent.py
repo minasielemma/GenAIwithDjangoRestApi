@@ -77,23 +77,24 @@ class DocumentAgent:
 
     def ask(self, query: str):
         logger.info("Received ask query: %s", query)
-        try:
-            result = self.agent.invoke({"input": query})
-            logger.info("Agent response: %s", result)
-            
-            return {
-                "answer": result,
-                "session_id": self.session_id,
-                "doc_id": self.doc_id,
-            }
-        except  OutputParserException as e:
-            fallback_response = self.llm(f"Please answer this question directly: {query}")
-            return {
-                "answer": {"output": fallback_response},
-                "session_id": self.session_id,
-                "doc_id": self.doc_id,
-                "error_handled": True
-            }
+        result = self.agent.invoke({"input": query})
+        # Save context using the memory object directly
+        self.memory.save_context({"input": query}, result)
+        logger.info("Agent response: %s", result)
+        
+        return {
+            "answer": result,
+            "session_id": self.session_id,
+            "doc_id": self.doc_id,
+        }
+        # except  OutputParserException as e:
+        #     fallback_response = self.llm(f"Please answer this question directly: {query}")
+        #     return {
+        #         "answer": {"output": fallback_response},
+        #         "session_id": self.session_id,
+        #         "doc_id": self.doc_id,
+        #         "error_handled": True
+        #     }
 
     def clear_memory(self):
         logger.info("Clearing memory for session: %s", self.session_id)

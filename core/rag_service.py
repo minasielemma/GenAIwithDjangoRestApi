@@ -11,7 +11,7 @@ class LocalPDFVectorizer:
 
     def __init__(self, doc_id: int):
         self.doc_id = doc_id
-        self.embeddings = OllamaEmbeddings(model="artifish/llama3.2-uncensored")
+        self.embeddings = OllamaEmbeddings(model="codellama:latest")
         self.index_path = os.path.join(FAISS_INDEX_DIR, f"doc_{doc_id}")
 
     def load_and_split_pdf(self, file_path: str, chunk_size: int = 1000, chunk_overlap: int = 100):
